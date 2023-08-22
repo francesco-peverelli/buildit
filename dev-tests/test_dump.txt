@@ -1,0 +1,67 @@
+arg0
+POINTER_TYPE
+  SCALAR_TYPE (INT)
+arg1
+POINTER_TYPE
+  SCALAR_TYPE (INT)
+arg2
+POINTER_TYPE
+  SCALAR_TYPE (INT)
+arg3
+SCALAR_TYPE (INT)
+FUNC_DECL
+  SCALAR_TYPE (VOID)
+  VAR (arg0)
+  VAR (arg1)
+  VAR (arg2)
+  VAR (arg3)
+  STMT_BLOCK
+    FOR_STMT
+      DECL_STMT
+        SCALAR_TYPE (INT)
+        VAR (var4)
+        INT_CONST (0)
+      LT_EXPR
+        VAR_EXPR
+          VAR (var4)
+        VAR_EXPR
+          VAR (arg3)
+      ASSIGN_EXPR
+        VAR_EXPR
+          VAR (var4)
+        PLUS_EXPR
+          VAR_EXPR
+            VAR (var4)
+          INT_CONST (1)
+      STMT_BLOCK
+        EXPR_STMT
+          ASSIGN_EXPR
+            SQ_BKT_EXPR
+              VAR_EXPR
+                VAR (arg2)
+              VAR_EXPR
+                VAR (var4)
+            PLUS_EXPR
+              SQ_BKT_EXPR
+                VAR_EXPR
+                  VAR (arg0)
+                VAR_EXPR
+                  VAR (var4)
+              SQ_BKT_EXPR
+                VAR_EXPR
+                  VAR (arg1)
+                VAR_EXPR
+                  VAR (var4)
+
+void vadd (int* arg0, int* arg1, int* arg2, int arg3) {
+  #pragma HLS dataflow
+  
+#pragma HLS INTERFACE m_axi port = arg0 bundle = gmem0
+#pragma HLS INTERFACE m_axi port = arg1 bundle = gmem1
+#pragma HLS INTERFACE m_axi port = arg2 bundle = gmem0
+#pragma HLS INTERFACE s_axilite port = arg3 bundle = control1
+  for (int var4 = 0; var4 < arg3; var4 = var4 + 1) {
+    arg2[var4] = arg0[var4] + arg1[var4];
+  }
+}
+

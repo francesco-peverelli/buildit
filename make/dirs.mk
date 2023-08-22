@@ -13,10 +13,12 @@ INCLUDES=$(wildcard $(INCLUDE_DIR)/*.h) $(wildcard $(INCLUDE_DIR)/*/*.h) $(BUILD
 BUILDER_SRC=$(wildcard $(SRC_DIR)/builder/*.cpp)
 BLOCKS_SRC=$(wildcard $(SRC_DIR)/blocks/*.cpp)
 UTIL_SRC=$(wildcard $(SRC_DIR)/util/*.cpp)
+VITIS_SRC=$(wildcard $(SRC_DIR)/vitis/*.cpp)
 
 BUILDER_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BUILDER_SRC:.cpp=.o))
 BLOCKS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(BLOCKS_SRC:.cpp=.o))
 UTIL_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(UTIL_SRC:.cpp=.o))
+VITIS_OBJS=$(subst $(SRC_DIR),$(BUILD_DIR),$(VITIS_SRC:.cpp=.o))
 
-LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS) 
+LIBRARY_OBJS=$(BUILDER_OBJS) $(BLOCKS_OBJS) $(UTIL_OBJS) $(VITIS_OBJS)
 LIBRARY=$(BUILD_DIR)/lib$(LIBRARY_NAME).a
