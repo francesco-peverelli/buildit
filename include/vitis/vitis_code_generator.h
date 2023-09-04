@@ -10,11 +10,13 @@ namespace vitis {
 	using block::c_code_generator::visit;
 	using block::c_code_generator::c_code_generator;
 
-	virtual void visit(block::for_stmt::Ptr);
 	virtual void visit(block::decl_stmt::Ptr);
+	virtual void visit(block::expr_stmt::Ptr);
 
-	void expand_pragmas(block::stmt::Ptr s);
-	void generate_user_annotation(block::stmt::Ptr s);
+	void expand_pragmas(block::decl_stmt::Ptr s);
+	void expand_pragmas(block::expr_stmt::Ptr s);
+	void generate_user_annotation(block::decl_stmt::Ptr s);
+	void generate_user_annotation(block::expr_stmt::Ptr s);
 
 public:
 	static void generate_code(block::block::Ptr ast, std::ostream &oss, int indent = 0) {
