@@ -86,7 +86,8 @@ struct as_global {
 // With name is just like as_global but can be used locally
 struct with_name {
 	std::string name;
-	with_name(const std::string &n) : name(n) {}
+	bool with_decl;
+	with_name(const std::string &n, bool wd = false) : name(n), with_decl(wd) {}
 };
 
 template <typename T>
@@ -127,7 +128,16 @@ public:
 		return (BT) * this = a;
 	}
 
+	BT operator=(const unsigned int &a) {
+		return operator=((BT)a);
+	}
 	BT operator=(const int &a) {
+		return operator=((BT)a);
+	}
+	BT operator=(const long long &a) {
+		return operator=((BT)a);
+	}
+	BT operator=(const unsigned long long &a) {
 		return operator=((BT)a);
 	}
 
@@ -211,8 +221,9 @@ public:
 	}
 	dyn_var_impl(const with_name &v) {
 		// with_name constructors don't usually get declarations
-		create_dyn_var(true);
+		create_dyn_var(!v.with_decl);
 		block_var->var_name = v.name;
+		block_var->preferred_name = "";
 		var_name = v.name;
 	}
 	dyn_var_impl(const dyn_var_sentinel_type &a, std::string name = "") {
@@ -279,6 +290,9 @@ public:
 	}
 
 	dyn_var_impl(const int &a) : my_type((BT)a) {}
+	dyn_var_impl(const unsigned int &a) : my_type((BT)a) {}
+	dyn_var_impl(const long long &a) : my_type((BT)a) {}
+	dyn_var_impl(const unsigned long long &a) : my_type((BT)a) {}
 	dyn_var_impl(const bool &a) : my_type((BT)a) {}
 	dyn_var_impl(const double &a) : my_type((BT)a) {}
 	dyn_var_impl(const float &a) : my_type((BT)a) {}
