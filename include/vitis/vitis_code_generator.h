@@ -10,8 +10,16 @@ namespace vitis {
 	using block::c_code_generator::visit;
 	using block::c_code_generator::c_code_generator;
 
-	virtual void visit(block::decl_stmt::Ptr);
 	virtual void visit(block::expr_stmt::Ptr);
+	virtual void visit(block::for_stmt::Ptr);
+	virtual void visit(block::decl_stmt::Ptr);
+	virtual void visit(block::if_stmt::Ptr);
+	virtual void visit(block::label_stmt::Ptr);
+	virtual void visit(block::goto_stmt::Ptr);
+	virtual void visit(block::while_stmt::Ptr);
+	virtual void visit(block::break_stmt::Ptr);
+	virtual void visit(block::func_decl::Ptr);
+	virtual void visit(block::return_stmt::Ptr);
 
 	void expand_pragmas(block::decl_stmt::Ptr s);
 	void expand_pragmas(block::expr_stmt::Ptr s);
