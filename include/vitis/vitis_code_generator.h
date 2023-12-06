@@ -10,6 +10,8 @@ namespace vitis {
 	using block::c_code_generator::visit;
 	using block::c_code_generator::c_code_generator;
 
+	std::string parent_loop_annotation = "";
+
 	virtual void visit(block::expr_stmt::Ptr);
 	virtual void visit(block::for_stmt::Ptr);
 	virtual void visit(block::decl_stmt::Ptr);
@@ -17,14 +19,17 @@ namespace vitis {
 	virtual void visit(block::label_stmt::Ptr);
 	virtual void visit(block::goto_stmt::Ptr);
 	virtual void visit(block::while_stmt::Ptr);
+	virtual void visit(block::stmt_block::Ptr);
 	virtual void visit(block::break_stmt::Ptr);
 	virtual void visit(block::func_decl::Ptr);
 	virtual void visit(block::return_stmt::Ptr);
 
-	void expand_pragmas(block::decl_stmt::Ptr s);
-	void expand_pragmas(block::expr_stmt::Ptr s);
-	void generate_user_annotation(block::decl_stmt::Ptr s);
-	void generate_user_annotation(block::expr_stmt::Ptr s);
+	void expand_pragmas(block::stmt::Ptr s);
+	//void expand_pragmas(block::stmt::Ptr s);
+	void replace_var_name(std::string name, std::string& s);
+	void generate_user_annotation(std::string annotation_line, bool post = false);
+	void generate_user_annotation(block::stmt::Ptr s, bool post = false);
+	//void generate_user_annotation(block::expr_stmt::Ptr s);
 
 public:
 	static void generate_code(block::block::Ptr ast, std::ostream &oss, int indent = 0) {

@@ -63,6 +63,9 @@ public:
 	virtual void visit(named_type::Ptr);
 
 	void handle_func_arg(var::Ptr a);
+	void handle_array_arg(var::Ptr a);
+	void handle_ptr_arg(var::Ptr a);
+	void handle_ref_arg(var::Ptr a);
 	virtual void visit(func_decl::Ptr);
 	virtual void visit(return_stmt::Ptr);
 	virtual void visit(member_access_expr::Ptr);

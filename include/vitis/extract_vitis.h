@@ -11,10 +11,12 @@
 #include <vector>
 
 #define VITIS_KERNEL "kernel:vitis:auto"
+#define VITIS_KERNEL_END "kernel:vitis:end"
 
 namespace block {
 
 void extract_vitis_from(block::Ptr from);
+std::vector<var::Ptr> extract_function_args(block::Ptr function);
 extern int vitis_device_mem_ports;
 
 class gather_func_args : public block_visitor {

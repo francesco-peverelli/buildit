@@ -3,6 +3,7 @@
 #include "blocks/expr.h"
 #include "blocks/stmt.h"
 #include "builder/forward_declarations.h"
+#include "util/tracer.h"
 #include <functional>
 #include <list>
 #include <unordered_map>
@@ -119,6 +120,7 @@ public:
 	template <typename T>
 	T *assume_variable(std::string name) {
 		T *new_asm_variable = new T(dyn_var_sentinel_type());
+		new_asm_variable->block_var->static_offset = tracer::get_unique_tag();
 		new_asm_variable->block_var->var_name = name;
 		assume_variables.push_back(new_asm_variable);
 

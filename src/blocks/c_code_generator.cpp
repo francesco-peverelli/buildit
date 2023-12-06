@@ -5,6 +5,7 @@
 #include <sstream>
 
 namespace block {
+	
 void c_code_generator::visit(not_expr::Ptr a) {
 	oss << "!(";
 	a->expr1->accept(this);
@@ -198,23 +199,23 @@ void c_code_generator::visit(named_type::Ptr type) {
 	}
 }
 void c_code_generator::visit(pointer_type::Ptr type) {
-	if (!isa<scalar_type>(type->pointee_type) && !isa<pointer_type>(type->pointee_type) &&
-	    !isa<named_type>(type->pointee_type))
-		assert(false && "Printing pointers of complex type is not supported yet");
+	//if (!isa<scalar_type>(type->pointee_type) && !isa<pointer_type>(type->pointee_type) &&
+	//    !isa<named_type>(type->pointee_type))
+	//	assert(false && "Printing pointers of complex type is not supported yet");
 	type->pointee_type->accept(this);
 	oss << "*";
 }
 void c_code_generator::visit(reference_type::Ptr type) {
-	if (!isa<scalar_type>(type->referenced_type) && !isa<pointer_type>(type->referenced_type) &&
-	    !isa<named_type>(type->referenced_type))
-		assert(false && "Printing pointers of complex type is not supported yet");
+//	if (!isa<scalar_type>(type->referenced_type) && !isa<pointer_type>(type->referenced_type) &&
+//	    !isa<named_type>(type->referenced_type))
+//		assert(false && "Printing pointers of complex type is not supported yet");
 	type->referenced_type->accept(this);
 	oss << "&";
 }
 void c_code_generator::visit(array_type::Ptr type) {
-	if (!isa<scalar_type>(type->element_type) && !isa<pointer_type>(type->element_type) &&
-	    !isa<named_type>(type->element_type))
-		assert(false && "Printing arrays of complex type is not supported yet");
+//	if (!isa<scalar_type>(type->element_type) && !isa<pointer_type>(type->element_type) &&
+//	    !isa<named_type>(type->element_type))
+//		assert(false && "Printing arrays of complex type is not supported yet");
 	type->element_type->accept(this);
 	if (type->size != -1)
 		oss << "[" << type->size << "]";
@@ -430,6 +431,68 @@ void c_code_generator::handle_func_arg(var::Ptr a) {
 	oss << ")";
 	return;
 }
+void c_code_generator::handle_array_arg(var::Ptr a) {
+	type::Ptr base_ty = a->var_type;
+	std::vector<unsigned> sizes;
+	while(isa<array_type>(base_ty)){
+		auto arr_ty = to<array_type>(base_ty);
+		base_ty = arr_ty->element_type;
+		sizes.push_back(arr_ty->size);
+	}
+	base_ty->accept(this);
+	oss << " ";
+	oss << a->var_name;
+	for(auto s: sizes){
+		oss << "[" << s << "]";
+	}
+}
+void c_code_generator::handle_ptr_arg(var::Ptr a) {
+	type::Ptr base_ty = a->var_type;
+	std::string stars = "";
+	std::vector<unsigned> sizes;
+	while(isa<pointer_type>(base_ty)){
+		auto ptr_ty = to<pointer_type>(base_ty);
+		base_ty = ptr_ty->pointee_type;
+		stars += "*";
+	}
+	bool array = false;
+	while(isa<array_type>(base_ty)){
+		auto arr_ty = to<array_type>(base_ty);
+		base_ty = arr_ty->element_type;
+		sizes.push_back(arr_ty->size);
+		array = true;
+	}
+	base_ty->accept(this);
+	oss << " ";
+	if(array) oss << "(";
+	oss << stars;
+	oss << a->var_name;
+	if(array) oss << ")";
+	for(auto s: sizes){
+		oss << "[" << s << "]";
+	}
+}
+void c_code_generator::handle_ref_arg(var::Ptr a) {
+	type::Ptr base_ty = a->var_type;
+	std::string amps = "";
+	std::vector<unsigned> sizes;
+	while(isa<reference_type>(base_ty)){
+		auto ptr_ty = to<reference_type>(base_ty);
+		base_ty = ptr_ty->referenced_type;
+		amps += "&";
+	}
+	while(isa<array_type>(base_ty)){
+		auto arr_ty = to<array_type>(base_ty);
+		base_ty = arr_ty->element_type;
+		sizes.push_back(arr_ty->size);
+	}
+	base_ty->accept(this);
+	oss << amps;
+	oss << " " << a->var_name;
+	for(auto s: sizes){
+		oss << "[" << s << "]";
+	}
+}
 void c_code_generator::visit(func_decl::Ptr a) {
 	a->return_type->accept(this);
 	if (a->hasMetadata<std::vector<std::string>>("attributes")) {
@@ -447,6 +510,12 @@ void c_code_generator::visit(func_decl::Ptr a) {
 		printDelim = true;
 		if (isa<function_type>(arg->var_type)) {
 			handle_func_arg(arg);
+		} else if(isa<array_type>(arg->var_type)){
+			handle_array_arg(arg);
+		} else if(isa<pointer_type>(arg->var_type)){
+			handle_ptr_arg(arg);
+		} else if(isa<reference_type>(arg->var_type)){
+			handle_ref_arg(arg);
 		} else {
 			arg->var_type->accept(this);
 			oss << " " << arg->var_name;

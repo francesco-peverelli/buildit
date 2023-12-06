@@ -129,8 +129,9 @@ public:
 		// We also don't need to check if the type is the same, if the tags
 		// are the same, the types should be the same.
 		// Checking static_offset here should not mess with pattern matchers
-		if (static_offset != other->static_offset)
+		if (static_offset != other->static_offset){
 			return false;
+		}
 		return true;
 	}
 };

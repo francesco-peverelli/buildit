@@ -289,11 +289,13 @@ public:
 
 	var::Ptr var1;
 	virtual bool is_same(block::Ptr other) override {
-		if (!isa<var_expr>(other))
+		if (!isa<var_expr>(other)){
 			return false;
+		}
 		var_expr::Ptr other_expr = to<var_expr>(other);
-		if (!var1->is_same(other_expr->var1))
+		if (!var1->is_same(other_expr->var1)) {
 			return false;
+		}
 		return true;
 	}
 };

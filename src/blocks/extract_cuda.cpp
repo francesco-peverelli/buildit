@@ -208,7 +208,7 @@ block::Ptr extract_single_cuda(block::Ptr from, std::vector<decl_stmt::Ptr> &new
 
 	kernel->body = inner_loop->body;
 
-	// If this is a coop kernel, return the values
+	// If this is a coop kernel, return the valuesca
 	std::vector<stmt::Ptr> copy_backs;
 	if (is_coop) {
 		auto if_s = std::make_shared<if_stmt>();
