@@ -133,7 +133,7 @@ void loop_finder::visit(stmt_block::Ptr a) {
 	while (1) {
 		label_stmt::Ptr found_label = nullptr;
 		for (auto stmt : a->stmts) {
-			if (isa<label_stmt>(stmt)) {
+			if (isa<label_stmt>(stmt) && (!stmt->hasMetadata<bool>("loop_done") || !stmt->getMetadata<bool>("loop_done"))) {
 				found_label = to<label_stmt>(stmt);
 			}
 		}
@@ -169,6 +169,8 @@ void loop_finder::visit_label(label_stmt::Ptr a, stmt_block::Ptr parent) {
 		stmts_before.push_back(*stmt);
 	}
 	stmt++;
+	stmts_before.push_back(a);
+	a->setMetadata<bool>("loop_done", true);
 	for (; stmt != parent->stmts.end(); stmt++) {
 		stmts_in_body.push_back(*stmt);
 		if (*stmt == last_stmt)

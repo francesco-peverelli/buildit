@@ -279,7 +279,6 @@ public:
 
 		block::function_call_expr::Ptr expr = std::make_shared<block::function_call_expr>();
 		expr->static_offset = offset;
-
 		expr->expr1 = block_expr;
 		expr->args = extract_call_arguments<BT>(args...);
 		std::reverse(expr->args.begin(), expr->args.end());

@@ -76,10 +76,20 @@ static bool has_further_uses(decl_stmt::Ptr decl, std::vector<stmt::Ptr> stmts, 
 	}
 	return false;
 }
+
+static stmt::Ptr find_non_label(stmt_block::Ptr a, unsigned i){
+	for(unsigned j = i; j >= 1; j--){
+		if(!isa<label_stmt>(a->stmts[j-1]))
+			return a->stmts[j-1];
+	}
+	return nullptr;
+}
+
 void for_loop_finder::visit(stmt_block::Ptr a) {
 	while (1) {
 		int while_loop_index = -1;
 		std::vector<stmt_block::Ptr> parents;
+		stmt::Ptr last_stmt;
 		for (unsigned int i = 0; i < a->stmts.size(); i++) {
 			parents.clear();
 			if (isa<while_stmt>(a->stmts[i])) {
@@ -88,17 +98,20 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				// conversion
 				if (i == 0)
 					continue;
-				if (!(isa<decl_stmt>(a->stmts[i - 1]) ||
-				      (isa<expr_stmt>(a->stmts[i - 1]) &&
-				       isa<assign_expr>(to<expr_stmt>(a->stmts[i - 1])->expr1))))
+				last_stmt = find_non_label(a, i);
+				if(last_stmt == nullptr)
+					continue;
+				if (!(isa<decl_stmt>(last_stmt) ||
+				      (isa<expr_stmt>(last_stmt) &&
+				       isa<assign_expr>(to<expr_stmt>(last_stmt)->expr1))))
 					continue;
 
 				var::Ptr init_var;
-				if (isa<decl_stmt>(a->stmts[i - 1])) {
-					decl_stmt::Ptr decl = to<decl_stmt>(a->stmts[i - 1]);
+				if (isa<decl_stmt>(last_stmt)) {
+					decl_stmt::Ptr decl = to<decl_stmt>(last_stmt);
 					init_var = decl->decl_var;
 				} else {
-					auto assign = to<assign_expr>(to<expr_stmt>(a->stmts[i - 1])->expr1);
+					auto assign = to<assign_expr>(to<expr_stmt>(last_stmt)->expr1);
 					if (!isa<var_expr>(assign->var1))
 						continue;
 					init_var = to<var_expr>(assign->var1)->var1;
@@ -133,22 +146,25 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 					if (!is_update(init_var, stmt->stmts[stmt->stmts.size() - 2]))
 						continue;
 				}
-				while_loop_index = i - 1;
+				while_loop_index = i;
 				break;
 			}
 		}
 		if (while_loop_index != -1) {
-			while_stmt::Ptr loop = to<while_stmt>(a->stmts[while_loop_index + 1]);
+			while_stmt::Ptr loop = to<while_stmt>(a->stmts[while_loop_index]);
 			std::vector<stmt::Ptr> new_stmts;
-			for (int i = 0; i < while_loop_index; i++)
+			for (int i = 0; i < while_loop_index; i++){
+				if(a->stmts[i] == last_stmt)
+					continue;
 				new_stmts.push_back(a->stmts[i]);
+			}
 			for_stmt::Ptr for_loop = std::make_shared<for_stmt>();
-			for_loop->static_offset = a->stmts[while_loop_index]->static_offset;
+			for_loop->static_offset = last_stmt->static_offset;
 			// Before we merge the decl with the for loop, make sure
 			// the variable being declared doesn't have any other uses
-			auto decl = a->stmts[while_loop_index];
+			auto decl = last_stmt;
 			if (isa<decl_stmt>(decl) &&
-			    has_further_uses(to<decl_stmt>(decl), a->stmts, while_loop_index + 2)) {
+			    has_further_uses(to<decl_stmt>(decl), a->stmts, while_loop_index + 1)) {
 				auto ce = std::make_shared<int_const>();
 				ce->value = 0;
 				auto es = std::make_shared<expr_stmt>();
@@ -157,7 +173,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 				// Keep the decl in the new stmts
 				new_stmts.push_back(decl);
 			} else
-				for_loop->decl_stmt = a->stmts[while_loop_index];
+				for_loop->decl_stmt = last_stmt;
 			for_loop->annotation = for_loop->decl_stmt->annotation;
 			for_loop->decl_stmt->annotation = "";
 			for_loop->cond = loop->cond;
@@ -188,7 +204,7 @@ void for_loop_finder::visit(stmt_block::Ptr a) {
 
 			for_loop->body = loop->body;
 			new_stmts.push_back(for_loop);
-			for (unsigned int i = while_loop_index + 2; i < a->stmts.size(); i++)
+			for (unsigned int i = while_loop_index + 1; i < a->stmts.size(); i++)
 				new_stmts.push_back(a->stmts[i]);
 			a->stmts = new_stmts;
 		} else

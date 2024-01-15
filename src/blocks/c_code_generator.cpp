@@ -86,6 +86,8 @@ void c_code_generator::visit(mod_expr::Ptr a) {
 	emit_binary_expr(a, "%");
 }
 void c_code_generator::visit(var_expr::Ptr a) {
+	//oss << "/* " << a->static_offset.stringify() << "*/";
+
 	oss << a->var1->var_name;
 }
 void c_code_generator::visit(int_const::Ptr a) {
@@ -393,12 +395,16 @@ void c_code_generator::visit(sq_bkt_expr::Ptr a) {
 	oss << "]";
 }
 void c_code_generator::visit(function_call_expr::Ptr a) {
+	if(a->expr1){
 	if (expr_needs_bracket(a->expr1)) {
 		oss << "(";
 	}
 	a->expr1->accept(this);
 	if (expr_needs_bracket(a->expr1)) {
 		oss << ")";
+	}
+	} else {
+		oss << "TOKEN";
 	}
 	oss << "(";
 	for (unsigned int i = 0; i < a->args.size(); i++) {
@@ -407,6 +413,7 @@ void c_code_generator::visit(function_call_expr::Ptr a) {
 			oss << ", ";
 	}
 	oss << ")";
+
 }
 void c_code_generator::visit(initializer_list_expr::Ptr a) {
 	oss << "{";

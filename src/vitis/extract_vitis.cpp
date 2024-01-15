@@ -12,7 +12,7 @@ std::vector<var::Ptr> extract_function_args(block::Ptr function) {
     gather_func_args func_args;
     if(isa<func_decl>(function)){
         to<func_decl>(function)->accept(&func_args);
-    } 
+    }
 
     return func_args.args;
 }
